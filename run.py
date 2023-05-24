@@ -37,80 +37,13 @@ logger = logging.getLogger(__name__)
 CALCULATE, TRADE, DECISION = range(3)
 
 # allowed FX symbols
-SYMBOLS = ['GBPUSDm', 'EURUSDm', 'US30m', 'XAUUSDm','AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NOW', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD', 'US30']
+SYMBOLS = ['AUDCAD.HKT', 'AUDCHF.HKT', 'AUDJPY.HKT', 'AUDNZD.HKT', 'AUDUSD.HKT', 'CADCHF.HKT', 'CADJPY.HKT', 'CHFJPY.HKT', 'EURAUD.HKT', 'EURCAD.HKT', 'EURCHF.HKT', 'EURGBP.HKT', 'EURJPY.HKT', 'EURNZD.HKT', 'EURUSD.HKT', 'GBPAUD.HKT', 'GBPCAD.HKT', 'GBPCHF.HKT', 'GBPJPY.HKT', 'GBPNZD.HKT', 'GBPUSD.HKT', 'NOW', 'NZDCAD.HKT', 'NZDCHF.HKT', 'NZDJPY.HKT', 'NZDUSD.HKT', 'USDCAD.HKT', 'USDCHF.HKT', 'USDJPY.HKT', 'XAGUSD.HKT', 'XAUUSD.HKT']
 
 # RISK FACTOR
 RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
 
 
 # Helper Functions
-# def ParseSignal(signal: str) -> dict:
-#     """Starts process of parsing signal and entering trade on MetaTrader account.
-
-#     Arguments:
-#         signal: trading signal
-
-#     Returns:
-#         a dictionary that contains trade signal information
-#     """
-
-#     # converts message to list of strings for parsing
-#     signal = signal.splitlines()
-#     signal = [line.rstrip() for line in signal]
-
-#     trade = {}
-
-#     # determines the order type of the trade
-#     if('Buy Limit'.lower() in signal[0].lower()):
-#         trade['OrderType'] = 'Buy Limit'
-
-#     elif('Sell Limit'.lower() in signal[0].lower()):
-#         trade['OrderType'] = 'Sell Limit'
-
-#     elif('Buy Stop'.lower() in signal[0].lower()):
-#         trade['OrderType'] = 'Buy Stop'
-
-#     elif('Sell Stop'.lower() in signal[0].lower()):
-#         trade['OrderType'] = 'Sell Stop'
-
-#     elif('Buy'.lower() in signal[0].lower()):
-#         trade['OrderType'] = 'Buy'
-    
-#     elif('Sell'.lower() in signal[0].lower()):
-#         trade['OrderType'] = 'Sell'
-    
-#     # returns an empty dictionary if an invalid order type was given
-#     else:
-#         return {}
-
-#     # extracts symbol from trade signal
-#     trade['Symbol'] = (signal[0].split())[-1].upper()
-    
-#     # checks if the symbol is valid, if not, returns an empty dictionary
-#     if(trade['Symbol'] not in SYMBOLS):
-#         return {}
-    
-#     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
-#     if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell'):
-#         trade['Entry'] = (signal[1].split())[-1]
-    
-#     else:
-#         trade['Entry'] = float((signal[1].split())[-1])
-    
-#     trade['StopLoss'] = float((signal[2].split())[-1])
-#     trade['TP'] = [float((signal[3].split())[-1])]
-
-#     # checks if there's a fourth line and parses it for TP2
-#     if(len(signal) > 4):
-#         trade['TP'].append(float(signal[4].split()[-1]))
-    
-#     # adds risk factor to trade
-#     trade['RiskFactor'] = RISK_FACTOR
-
-#     return trade
-
-
-# Eliezer's ParseSignal Function
 def ParseSignal(signal: str) -> dict:
     """Starts process of parsing signal and entering trade on MetaTrader account.
 
@@ -120,12 +53,13 @@ def ParseSignal(signal: str) -> dict:
     Returns:
         a dictionary that contains trade signal information
     """
-    
+
     # converts message to list of strings for parsing
     signal = signal.splitlines()
     signal = [line.rstrip() for line in signal]
-    print(signal)
+
     trade = {}
+
     # determines the order type of the trade
     if('Buy Limit'.lower() in signal[0].lower()):
         trade['OrderType'] = 'Buy Limit'
@@ -144,57 +78,32 @@ def ParseSignal(signal: str) -> dict:
     
     elif('Sell'.lower() in signal[0].lower()):
         trade['OrderType'] = 'Sell'
-
-    elif('Buy'.lower() in signal[1].lower()):
-        trade['OrderType'] = 'Buy'
-
-    elif('Sell'.lower() in signal[1].lower()):
-        trade['OrderType'] = 'Sell'
-
-    elif('Buy'.lower() in signal[2].lower()):
-        trade['OrderType'] = 'Buy'
-
-    elif('Sell'.lower() in signal[2].lower()):
-        trade['OrderType'] = 'Sell'
     
     # returns an empty dictionary if an invalid order type was given
     else:
         return {}
-    
+
     # extracts symbol from trade signal
-    if('US 30'.lower() in signal[0].lower()):
-        trade['Symbol'] = 'US30'
-    else:
-        trade['Symbol'] = (signal[0].split())[0].upper()[0:6]
+    trade['Symbol'] = (signal[0].split())[-1].upper()
+    
     # checks if the symbol is valid, if not, returns an empty dictionary
     if(trade['Symbol'] not in SYMBOLS):
         return {}
-
+    
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
     if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell'):
-        trade['Entry'] = 'NOW'
+        trade['Entry'] = (signal[1].split())[-1]
     
     else:
         trade['Entry'] = float((signal[1].split())[-1])
-
-    # cheks if it is an EA signal or Elvis' signal    
-    if('EA SIGNAL INPUT'.lower() in signal[1].lower()):
-        trade['StopLoss'] = float((signal[9].split())[-1])
-        trade['TP'] = [float((signal[4].split())[-1])]
     
+    trade['StopLoss'] = float((signal[2].split())[-1])
+    trade['TP'] = [float((signal[3].split())[-1])]
+
     # checks if there's a fourth line and parses it for TP2
-        if(len(signal) > 4):
-            trade['TP'].append(float(signal[5].split()[1]))
-            trade['TP'].append(float(signal[6].split()[1]))
-            trade['TP'].append(float(signal[7].split()[1]))
-    else:        
-        trade['StopLoss'] = float((signal[8].split())[1])
-        trade['TP'] = [float((signal[3].split())[1])]
-    # checks if there's a fourth line and parses it for TP2
-        if(len(signal) > 4):
-            trade['TP'].append(float(signal[4].split()[1]))
-            trade['TP'].append(float(signal[5].split()[1]))
-            trade['TP'].append(float(signal[6].split()[1]))
+    if(len(signal) > 4):
+        trade['TP'].append(float(signal[4].split()[-1]))
+    
     # adds risk factor to trade
     trade['RiskFactor'] = RISK_FACTOR
 
@@ -485,9 +394,9 @@ def unknown_command(update: Update, context: CallbackContext) -> None:
         update: update from Telegram
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
-    # if(not(update.effective_message.chat.username == TELEGRAM_USER)):
-    #     update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
-    #     return
+    if(not(update.effective_message.chat.username == TELEGRAM_USER)):
+        update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
+        return
 
     update.effective_message.reply_text("Unknown command. Use /trade to place a trade or /calculate to find information for a trade. You can also use the /help command to view instructions for this bot.")
 
@@ -566,9 +475,9 @@ def Trade_Command(update: Update, context: CallbackContext) -> int:
         update: update from Telegram
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
-    # if(not(update.effective_message.chat.username == TELEGRAM_USER)):
-    #     update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
-    #     return ConversationHandler.END
+    if(not(update.effective_message.chat.username == TELEGRAM_USER)):
+        update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
+        return ConversationHandler.END
     
     # initializes the user's trade as empty prior to input and parsing
     context.user_data['trade'] = None
@@ -585,9 +494,9 @@ def Calculation_Command(update: Update, context: CallbackContext) -> int:
         update: update from Telegram
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
-    # if(not(update.effective_message.chat.username == TELEGRAM_USER)):
-    #     update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
-    #     return ConversationHandler.END
+    if(not(update.effective_message.chat.username == TELEGRAM_USER)):
+        update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
+        return ConversationHandler.END
 
     # initializes the user's trade as empty prior to input and parsing
     context.user_data['trade'] = None
